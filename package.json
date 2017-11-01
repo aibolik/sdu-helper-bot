@@ -1,0 +1,18 @@
+{
+  "name": "sdu-helper-bot",
+  "version": "1.0.0",
+  "description": "Bot repository",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:aibolik/sdu-helper-bot.git"
+  },
+  "keywords": [
+    "logs"
+  ],
+  "author": "*.log",
+  "license": "ISC"
+}
