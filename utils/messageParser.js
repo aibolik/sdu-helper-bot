@@ -14,4 +14,4 @@ function log(message) {
 }
 
 exports.log = log;
-exports.hasHashtag = hasHashtag;
+exports.hasHashtags = hasHashtags;

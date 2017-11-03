@@ -1,13 +1,19 @@
+// load all environment variables
 require('dotenv').config();
-var fs = require('fs');
 
+var fs = require('fs');
 var builder = require('botbuilder');
 var restify = require('restify');
+var mongoose = require('mongoose');
+
 var log = require('./utils/messageParser.js').log;
-var hasHashtag = require('./utils/messageParser.js').hasHashtag;
+var hasHashtags = require('./utils/messageParser.js').hasHashtags;
 
 // Telegram specific channel objects
 var channelData = require('./telegram/channelData');
+
+// kind a RestAPI to interact with MongoDB server
+var api = require('./api');
 
 // for HTTPS
 var options = {
@@ -17,6 +23,12 @@ var options = {
 }
 
 var server = restify.createServer(options);
+
+const dbUrl = `mongodb://${process.env.MLAB_DB_USERNAME}:${process.env.MLAB_DB_PASSWORD}@ds245715.mlab.com:45715/sdu`;
+mongoose.connect(dbUrl, { useMongoClient: true });
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'MongoDB connection error'));
+
 
 server.listen(process.env.port || process.env.PORT || 3978, function () {
     console.log(`${server.name} is listening to ${server.url}`);
@@ -29,7 +41,7 @@ var connector = new builder.ChatConnector({
 
 server.post('/api/messages', connector.listen());
 
-const vacancyHashtag = '#vacancy';
+const vacancyHashtags = ['#vacancy', '#вакансия'];
 
 var bot = new builder.UniversalBot(connector);
 
@@ -40,31 +52,17 @@ bot.dialog('/', function (session) {
     var message = session.message;
     log(message);
 
-    if (hasHashtag(message.text, vacancyHashtag)) {
+    if (hasHashtags(message.text, vacancyHashtags)) {
         log('Message contains vacancy');
         var msg = new builder.Message(session);
-        // var sourceEvent = {
-        //     telegram: {
-        //         sendMessage: {
-        //             chat_id: message.sourceEvent.message.chat.id,
-        //             text: 'This message contains vacancy',
-        //             reply_to_message_id: message.sourceEvent.message.message_id
-        //         }
-        //     }
-        // };
-        // var sourceEvent = {
-        //     telegram: {
-        //         method: 'sendMessage',
-        //         parameters: {
-        //             chat_id: message.sourceEvent.message.chat.id,
-        //             text: 'This message contains vacancy',
-        //             reply_to_message_id: message.sourceEvent.message.message_id
-        //         }
-        //     }
-        // };
-        log('Event to be sent');
         var reply = new channelData.ReplyMessage(message, 'This message contains vacancy');
-        log(reply);
+        var userRequest = api.findOrCreateUser(message.sourceEvent.message.from.id, message.sourceEvent.message.from);
+        userRequest.then(user => {
+            console.log('We got a user');
+            log(user);
+        }).catch(err => {
+            console.log(err);
+        });
         msg.sourceEvent(reply);
         session.send(msg);
     } else {
