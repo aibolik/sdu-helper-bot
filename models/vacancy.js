@@ -7,9 +7,9 @@ var VacancySchema = Schema({
     salary: { type: String, max: 100 },
     city: { type: String, max: 100},
     occupation: { type: String, max: 100},
-    contacts: { type: String, max: 200 }
+    contacts: { type: String, max: 200 },
     description: { type: String },
-    author: { type: Schema.ObjectId, ref='User', required: true },
+    author: { type: Schema.ObjectId, ref: 'User', required: true },
     sourceChatId: { type: Number }
 });
 

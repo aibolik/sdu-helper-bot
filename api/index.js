@@ -1,5 +1,7 @@
 var User = require('../models/user');
+var Vacancy = require('../models/vacancy');
 
+// User API
 function getUserById(userId) {
     return new Promise(function (resolve, reject) {
         User.find({telegramChatId: userId}, 'telegramUsername')
@@ -18,10 +20,8 @@ function findOrCreateUser(userId, from = { first_name: '', last_name: '', userna
     return new Promise((resolve, reject) => {
         getUserById(userId).then(user => {
             if (user) {
-                console.log('exists');
                 return resolve(user);
             } else {
-                console.log('Creating new one');
                 var newUser = new User({
                     telegramChatId: userId,
                     telegramUsername: from.username,
@@ -33,7 +33,6 @@ function findOrCreateUser(userId, from = { first_name: '', last_name: '', userna
                         reject(err);
                         return;
                     }
-                    console.log('created!')
                     resolve(product);
                 })
             }
@@ -43,5 +42,38 @@ function findOrCreateUser(userId, from = { first_name: '', last_name: '', userna
     });
 };
 
+// Vacancy API
+function createVacancy(vacancyObject) {
+    return new Promise((resolve, reject) => {
+        var vacancy = new Vacancy(vacancyObject);
+        vacancy.save((err, product) => {
+            if (err) {
+                reject(err);
+                return;
+            }
+            resolve(true);
+            return;
+        })
+    });
+}
+
+function listVacancies() {
+    return new Promise((resolve, reject) => {
+        Vacancy.find({}).populate('author')
+            .exec((err, vacancyList) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                resolve(vacancyList);
+            });
+    });
+}
+
+// User API
 exports.getUserById = getUserById;
 exports.findOrCreateUser = findOrCreateUser;
+
+// Vacancy API
+exports.createVacancy = createVacancy;
+exports.listVacancies = listVacancies;
