@@ -53,6 +53,10 @@ function tryToParseVacancy(message, author) {
         ? text.substring(text.indexOf(KEY_DESCRIPTION) + KEY_DESCRIPTION.length)
         : NOT_PROVIDED;
 
+    if (position === NOT_PROVIDED) {
+        throw new Error('No position provided');
+    }
+
     return {
         position,
         salary,

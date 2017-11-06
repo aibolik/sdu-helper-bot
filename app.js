@@ -63,17 +63,26 @@ bot.dialog('/', function (session) {
     if (utils.hasHashtags(message.text, vacancyHashtags)) {
         log('Message contains vacancy');
         let msg = new builder.Message(session);
-        let reply = new channelData.ReplyMessage(message, texts.TEXT_MESSAGE_HAS_VACANCY);
         let userRequest = api.findOrCreateUser(message.sourceEvent.message.from.id, message.sourceEvent.message.from);
         userRequest.then(user => {
             console.log('We got a user');
             log(user);
-            let vacancy = utils.tryToParseVacancy(message, user);
+            let vacancy;
+            try {
+                vacancy = utils.tryToParseVacancy(message, user);
+            } catch(err) {
+                log(err);
+                let reply = new channelData.ReplyMessage(message, texts.TEXT_ERROR_VACANCY_NO_POSITION);
+                msg.sourceEvent(reply);
+                session.send(msg);
+                return;
+            }
             log(vacancy);
             let vacancyRequest = api.createVacancy(vacancy);
             vacancyRequest.then(result => {
                 if (result === true) {
                     log('Success, we created vacancy');
+                    let reply = new channelData.ReplyMessage(message, texts.TEXT_MESSAGE_HAS_VACANCY);
                     msg.sourceEvent(reply);
                     session.send(msg);
                 } else {
@@ -98,7 +107,8 @@ bot.dialog('/', function (session) {
                         text = '*Список вакансии:* \n\n';
                     }
                     for (let i in vacancyList) {
-                        text = text + `*${parseInt(i + 1)}.* `;
+                        let number = parseInt(i) + 1;
+                        text = text + `*${number}.* `;
                         text = text.concat(utils.formatVacancy(vacancyList[i])) + '\n\n';
                     }
                     log(text);
