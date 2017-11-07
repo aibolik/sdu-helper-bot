@@ -93,8 +93,13 @@ function formatVacancy(vacancy) {
     return result;
 }
 
+function isPrivate(message) {
+    return message.sourceEvent.message.chat.type === 'private';
+}
+
 exports.log = log;
 exports.hasHashtags = hasHashtags;
 exports.tryToParseVacancy = tryToParseVacancy;
 exports.getCommandsList = getCommandsList;
 exports.formatVacancy = formatVacancy;
+exports.isPrivate = isPrivate;
